@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(true);
   const [showMobilePanel, setShowMobilePanel] = useState(false);
+  const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
 
   const categories = ['Event', 'Community', 'Support', 'Product', 'Content'];
   
@@ -48,9 +49,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen ${theme.bg} ${theme.text} flex flex-col`}>
+    <div className={`h-screen ${theme.bg} ${theme.text} flex flex-col overflow-hidden`}>
       {/* Navbar */}
-      <header className={`sticky top-0 z-40 ${theme.bg} border-b ${theme.border}`}>
+      <header className={`sticky top-0 z-40 ${theme.bg} border-b ${theme.border} flex-shrink-0`}>
         {/* Top Row - Logo & Theme */}
         <div className="flex items-center justify-between px-4 md:px-6 py-3">
           <div className="flex items-center gap-3">
@@ -59,6 +60,14 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            <a 
+              href="https://www.linkedin.com/in/rohankokkula/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="mono text-[9px] text-neutral-600 hover:text-emerald-500 transition-colors hidden sm:block"
+            >
+              by rohan kokkula
+            </a>
             <div className="mono text-[10px] text-neutral-500 hidden sm:block">
               {filteredInitiatives.length} initiatives
             </div>
@@ -132,7 +141,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
         {/* Sidebar - Hidden on mobile, shown as bottom panel */}
         <div className={`hidden lg:flex w-[340px] flex-shrink-0 p-6 border-r ${theme.border} flex-col overflow-y-auto`}>
           <SidebarContent 
@@ -146,32 +155,72 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Chart */}
-        <div className="flex-1 p-4 md:p-6 min-h-[400px] lg:min-h-0">
-          <MatrixChart 
-            data={filteredInitiatives} 
-            activeId={activeId} 
-            onSelect={handleSelect}
-            isDark={isDark}
-            activeQuadrant={activeQuadrant}
-          />
-        </div>
-
-        {/* Mobile Metrics Bar */}
-        <div className={`lg:hidden border-t ${theme.border} p-4`}>
-          <div className="grid grid-cols-4 gap-2">
-            {(['reach', 'closeness', 'happiness', 'effort'] as const).map((key) => (
-              <div key={key} className="text-center">
-                <div className={`mono text-[8px] ${theme.textMuted} uppercase`}>
-                  {key.charAt(0)}
-                </div>
-                <div className={`text-xl font-light ${key === 'effort' ? 'text-orange-400' : ''}`}>
-                  {getMetricAverage(key)}
-                </div>
-              </div>
-            ))}
+        {/* Chart - Scrollable on mobile */}
+        <div className="flex-1 p-4 md:p-6 overflow-auto lg:overflow-visible">
+          <div className="min-h-[350px] h-full">
+            <MatrixChart 
+              data={filteredInitiatives} 
+              activeId={activeId} 
+              onSelect={handleSelect}
+              isDark={isDark}
+              activeQuadrant={activeQuadrant}
+            />
           </div>
         </div>
+      </div>
+
+      {/* Mobile Metrics Bar - Fixed at bottom */}
+      <div className={`lg:hidden flex-shrink-0 border-t ${theme.border} ${theme.bg}`}>
+        {/* Expanded Metric Definition - Shows above the bar */}
+        {expandedMetric && (
+          <div className={`px-4 py-3 border-b ${theme.border} animate-in`}>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`font-medium text-sm ${expandedMetric === 'effort' ? 'text-orange-400' : 'text-emerald-500'}`}>
+                {METRIC_DEFINITIONS[expandedMetric as keyof typeof METRIC_DEFINITIONS].name}
+              </span>
+              <button 
+                onClick={() => setExpandedMetric(null)}
+                className={`${theme.textMuted} text-xs p-1`}
+              >
+                ✕
+              </button>
+            </div>
+            <p className={`text-xs ${theme.textMuted} leading-relaxed`}>
+              {METRIC_DEFINITIONS[expandedMetric as keyof typeof METRIC_DEFINITIONS].description}
+            </p>
+          </div>
+        )}
+        
+        {/* Metric Buttons */}
+        <div className="grid grid-cols-4 gap-px">
+          {(['reach', 'closeness', 'happiness', 'effort'] as const).map((key) => (
+            <button 
+              key={key} 
+              onClick={() => setExpandedMetric(expandedMetric === key ? null : key)}
+              className={`text-center py-3 px-2 transition-all ${
+                expandedMetric === key 
+                  ? isDark ? 'bg-neutral-800' : 'bg-neutral-200'
+                  : isDark ? 'active:bg-neutral-800' : 'active:bg-neutral-200'
+              }`}
+            >
+              <div className={`mono text-[8px] uppercase mb-0.5 ${
+                expandedMetric === key ? 'text-emerald-500' : theme.textMuted
+              }`}>
+                {METRIC_DEFINITIONS[key].name.charAt(0)}
+              </div>
+              <div className={`text-lg font-light ${
+                key === 'effort' 
+                  ? 'text-orange-400' 
+                  : expandedMetric === key ? 'text-emerald-500' : ''
+              }`}>
+                {getMetricAverage(key)}
+              </div>
+            </button>
+          ))}
+        </div>
+        
+        {/* Safe area padding for phones with home indicator */}
+        <div className="h-safe-area-bottom" />
       </div>
 
       {/* Mobile Bottom Panel */}
@@ -356,7 +405,15 @@ const SidebarContent: React.FC<{
       ) : (
         <div className={`mt-auto p-4 border ${theme.border} opacity-50`}>
           <div className="mono text-[10px] uppercase tracking-widest mb-2">No Selection</div>
-          <p className="text-[11px] leading-relaxed">Click any initiative to see personalized analysis, ROI efficiency, and strategic recommendations.</p>
+          <p className="text-[11px] leading-relaxed mb-4">Click any initiative to see personalized analysis, ROI efficiency, and strategic recommendations.</p>
+          <a 
+            href="https://www.linkedin.com/in/rohankokkula/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="mono text-[9px] text-neutral-500 hover:text-emerald-500 transition-colors sm:hidden"
+          >
+            by rohan kokkula
+          </a>
         </div>
       )}
     </>
