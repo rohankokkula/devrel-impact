@@ -156,7 +156,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Chart - Scrollable on mobile */}
-        <div className="flex-1 p-4 md:p-6 overflow-auto lg:overflow-visible">
+        <div className="flex-1 p-4 md:p-6 pb-24 lg:pb-6 overflow-auto lg:overflow-visible">
           <div className="min-h-[350px] h-full">
             <MatrixChart 
               data={filteredInitiatives} 
@@ -170,10 +170,10 @@ const App: React.FC = () => {
       </div>
 
       {/* Mobile Metrics Bar - Fixed at bottom */}
-      <div className={`lg:hidden flex-shrink-0 border-t ${theme.border} ${theme.bg}`}>
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t ${theme.border} ${theme.bg}`}>
         {/* Expanded Metric Definition - Shows above the bar */}
         {expandedMetric && (
-          <div className={`px-4 py-3 border-b ${theme.border} animate-in`}>
+          <div className={`px-4 py-3 border-b ${theme.border} animate-in h-24`}>
             <div className="flex items-center justify-between mb-1">
               <span className={`font-medium text-sm ${expandedMetric === 'effort' ? 'text-orange-400' : 'text-emerald-500'}`}>
                 {METRIC_DEFINITIONS[expandedMetric as keyof typeof METRIC_DEFINITIONS].name}
@@ -185,7 +185,7 @@ const App: React.FC = () => {
                 ✕
               </button>
             </div>
-            <p className={`text-xs ${theme.textMuted} leading-relaxed`}>
+            <p className={`text-xs ${theme.textMuted} leading-relaxed line-clamp-3`}>
               {METRIC_DEFINITIONS[expandedMetric as keyof typeof METRIC_DEFINITIONS].description}
             </p>
           </div>
@@ -220,7 +220,7 @@ const App: React.FC = () => {
         </div>
         
         {/* Safe area padding for phones with home indicator */}
-        <div className="h-safe-area-bottom" />
+        <div className="pb-safe" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }} />
       </div>
 
       {/* Mobile Bottom Panel */}
