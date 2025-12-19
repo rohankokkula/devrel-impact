@@ -155,9 +155,9 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Chart - Scrollable on mobile */}
-        <div className="flex-1 p-4 md:p-6 pb-24 lg:pb-6 overflow-auto lg:overflow-visible">
-          <div className="min-h-[350px] h-full">
+        {/* Chart */}
+        <div className="flex-1 p-2 sm:p-4 md:p-6 pb-20 lg:pb-6 flex flex-col min-h-0">
+          <div className="flex-1 min-h-[280px]">
             <MatrixChart 
               data={filteredInitiatives} 
               activeId={activeId} 
@@ -228,18 +228,19 @@ const App: React.FC = () => {
         <div className={`lg:hidden fixed inset-0 z-50 flex flex-col`}>
           {/* Backdrop */}
           <div 
-            className="flex-1 bg-black/60 backdrop-blur-sm"
+            className="flex-shrink-0 h-[15vh] bg-black/60 backdrop-blur-sm"
             onClick={() => setShowMobilePanel(false)}
           />
           
           {/* Panel */}
-          <div className={`${theme.bg} border-t ${theme.border} max-h-[70vh] overflow-y-auto animate-slide-up`}>
-            <div className="p-4">
-              {/* Handle */}
-              <div className="flex justify-center mb-4">
-                <div className={`w-12 h-1 rounded-full ${isDark ? 'bg-neutral-700' : 'bg-neutral-300'}`} />
-              </div>
-              
+          <div className={`${theme.bg} border-t ${theme.border} flex-1 flex flex-col animate-slide-up`}>
+            {/* Handle - Fixed */}
+            <div className="flex-shrink-0 p-3 flex justify-center">
+              <div className={`w-12 h-1 rounded-full ${isDark ? 'bg-neutral-700' : 'bg-neutral-300'}`} />
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-8" style={{ WebkitOverflowScrolling: 'touch' }}>
               <MobilePanelContent 
                 activeInitiative={activeInitiative}
                 analysis={analysis}
@@ -375,16 +376,42 @@ const SidebarContent: React.FC<{
 
           {/* Quadrant Analysis */}
           <div className={`p-4 border-2 border-emerald-500 ${isDark ? 'bg-emerald-500/10' : 'bg-emerald-500/10'}`}>
-            <div className="mono text-[9px] uppercase tracking-widest text-emerald-500 mb-2">
-              {activeInitiative.name} Analysis
+            {/* Header with Mini Chart */}
+            <div className="flex gap-3 mb-4">
+              {/* Mini Chart */}
+              <div className="flex-shrink-0">
+                <svg width="64" height="64" viewBox="0 0 100 100" className="border border-emerald-500/30">
+                  <line x1="50" y1="0" x2="50" y2="100" stroke={isDark ? '#374151' : '#d1d5db'} strokeWidth="1" strokeDasharray="4,4" />
+                  <line x1="0" y1="50" x2="100" y2="50" stroke={isDark ? '#374151' : '#d1d5db'} strokeWidth="1" strokeDasharray="4,4" />
+                  <rect 
+                    x={activeInitiative.reach >= 50 ? 50 : 0} 
+                    y={activeInitiative.closeness >= 50 ? 0 : 50} 
+                    width="50" height="50" 
+                    fill="#10b981" fillOpacity="0.15"
+                  />
+                  <circle cx={activeInitiative.reach} cy={100 - activeInitiative.closeness} r="6" fill="#10b981" />
+                  <circle cx={activeInitiative.reach} cy={100 - activeInitiative.closeness} r="10" fill="none" stroke="#10b981" strokeWidth="1" opacity="0.5" />
+                </svg>
+              </div>
+              
+              {/* Title */}
+              <div className="flex-1">
+                <div className="mono text-[9px] uppercase tracking-widest text-emerald-500 mb-1">
+                  {activeInitiative.name}
+                </div>
+                <div className="font-semibold text-base text-emerald-500">{analysis.name}</div>
+                <div className="mono text-[9px] text-neutral-500 mt-1">
+                  R{activeInitiative.reach} / C{activeInitiative.closeness}
+                </div>
+              </div>
             </div>
-            <div className="font-semibold text-lg mb-1 text-emerald-500">{analysis.name}</div>
+            
             <div className={`text-[11px] ${theme.textMuted} mb-4`}>{analysis.description}</div>
             
             <div className="space-y-4">
               <div>
                 <div className={`mono text-[9px] uppercase tracking-widest ${theme.textMuted} mb-1`}>
-                  Why {activeInitiative.name} Matters
+                  Why It Matters
                 </div>
                 <p className={`text-[11px] leading-relaxed ${isDark ? 'text-neutral-300' : 'text-neutral-700'}`}>
                   {analysis.reasoning}
@@ -481,13 +508,63 @@ const MobilePanelContent: React.FC<{
         </div>
       </div>
 
-      {/* Quadrant Badge */}
+      {/* Quadrant Badge with Mini Chart */}
       <div className="p-4 border-2 border-emerald-500 bg-emerald-500/10 mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span className="font-semibold text-emerald-500">{analysis.name}</span>
+        <div className="flex gap-4">
+          {/* Mini Chart */}
+          <div className="flex-shrink-0">
+            <svg width="80" height="80" viewBox="0 0 100 100" className="border border-emerald-500/30">
+              {/* Quadrant lines */}
+              <line x1="50" y1="0" x2="50" y2="100" stroke={isDark ? '#374151' : '#d1d5db'} strokeWidth="1" strokeDasharray="4,4" />
+              <line x1="0" y1="50" x2="100" y2="50" stroke={isDark ? '#374151' : '#d1d5db'} strokeWidth="1" strokeDasharray="4,4" />
+              
+              {/* Highlight active quadrant */}
+              <rect 
+                x={activeInitiative.reach >= 50 ? 50 : 0} 
+                y={activeInitiative.closeness >= 50 ? 0 : 50} 
+                width="50" 
+                height="50" 
+                fill="#10b981" 
+                fillOpacity="0.15"
+              />
+              
+              {/* Dot position */}
+              <circle 
+                cx={activeInitiative.reach} 
+                cy={100 - activeInitiative.closeness} 
+                r="6" 
+                fill="#10b981"
+              />
+              <circle 
+                cx={activeInitiative.reach} 
+                cy={100 - activeInitiative.closeness} 
+                r="10" 
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="1"
+                opacity="0.5"
+              />
+              
+              {/* Quadrant labels */}
+              <text x="25" y="15" textAnchor="middle" fill={isDark ? '#6b7280' : '#9ca3af'} fontSize="6" fontFamily="monospace">ND</text>
+              <text x="75" y="15" textAnchor="middle" fill={isDark ? '#6b7280' : '#9ca3af'} fontSize="6" fontFamily="monospace">S+D</text>
+              <text x="25" y="95" textAnchor="middle" fill={isDark ? '#6b7280' : '#9ca3af'} fontSize="6" fontFamily="monospace">LI</text>
+              <text x="75" y="95" textAnchor="middle" fill={isDark ? '#6b7280' : '#9ca3af'} fontSize="6" fontFamily="monospace">BS</text>
+            </svg>
+          </div>
+          
+          {/* Quadrant Info */}
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="font-semibold text-emerald-500">{analysis.name}</span>
+            </div>
+            <div className={`text-xs ${theme.textMuted} mb-2`}>{analysis.description}</div>
+            <div className="mono text-[9px] text-neutral-500">
+              Position: R{activeInitiative.reach} / C{activeInitiative.closeness}
+            </div>
+          </div>
         </div>
-        <div className={`text-xs ${theme.textMuted}`}>{analysis.description}</div>
       </div>
 
       {/* Analysis */}
