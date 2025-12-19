@@ -22,7 +22,7 @@ export const MatrixChart: React.FC<Props> = ({ data, activeId, onSelect, isDark,
       ...item,
       cx: chartConfig.padding + (item.reach / 100) * (chartConfig.width - 2 * chartConfig.padding),
       cy: chartConfig.height - chartConfig.padding - (item.closeness / 100) * (chartConfig.height - 2 * chartConfig.padding),
-      r: 1 + (item.happiness / 100) * 2,
+      r: 1.2 + (item.happiness / 100) * 2,
     }));
   }, [data]);
 
@@ -50,59 +50,55 @@ export const MatrixChart: React.FC<Props> = ({ data, activeId, onSelect, isDark,
 
   const quadrantLabelClass = (quadrant: QuadrantType) => {
     if (activeQuadrant === quadrant) {
-      return 'text-emerald-500 font-bold text-[10px]';
+      return 'text-emerald-500 font-bold text-[8px] sm:text-[10px]';
     }
-    return `${isDark ? 'text-neutral-800' : 'text-neutral-300'} text-[8px]`;
+    return `${isDark ? 'text-neutral-800' : 'text-neutral-300'} text-[6px] sm:text-[8px]`;
   };
 
   return (
-    <div className="w-full h-full relative">
-      {/* Axis Labels */}
-      <div className={`absolute top-2 left-1/2 -translate-x-1/2 mono text-[9px] uppercase tracking-widest transition-all duration-300 ${axisLabelClass(highlightHighCloseness)}`}>
+    <div className="w-full h-full relative min-h-[300px]">
+      {/* Axis Labels - Responsive */}
+      <div className={`absolute top-1 sm:top-2 left-1/2 -translate-x-1/2 mono text-[7px] sm:text-[9px] uppercase tracking-wider transition-all duration-300 ${axisLabelClass(highlightHighCloseness)}`}>
         High Closeness
       </div>
-      <div className={`absolute bottom-2 left-1/2 -translate-x-1/2 mono text-[9px] uppercase tracking-widest transition-all duration-300 ${axisLabelClass(highlightLowCloseness)}`}>
+      <div className={`absolute bottom-1 sm:bottom-2 left-1/2 -translate-x-1/2 mono text-[7px] sm:text-[9px] uppercase tracking-wider transition-all duration-300 ${axisLabelClass(highlightLowCloseness)}`}>
         Low Closeness
       </div>
-      <div className={`absolute top-1/2 right-2 -translate-y-1/2 mono text-[9px] uppercase tracking-widest writing-vertical transition-all duration-300 ${axisLabelClass(highlightHighReach)}`}>
+      <div className={`absolute top-1/2 right-0 sm:right-2 -translate-y-1/2 mono text-[7px] sm:text-[9px] uppercase tracking-wider writing-vertical transition-all duration-300 ${axisLabelClass(highlightHighReach)}`}>
         High Reach
       </div>
-      <div className={`absolute top-1/2 left-2 -translate-y-1/2 mono text-[9px] uppercase tracking-widest writing-vertical transition-all duration-300 ${axisLabelClass(highlightLowReach)}`}>
+      <div className={`absolute top-1/2 left-0 sm:left-2 -translate-y-1/2 mono text-[7px] sm:text-[9px] uppercase tracking-wider writing-vertical transition-all duration-300 ${axisLabelClass(highlightLowReach)}`}>
         Low Reach
       </div>
 
       {/* Chart Container */}
-      <div className="absolute inset-10">
+      <div className="absolute inset-6 sm:inset-10">
         <svg 
           viewBox={`0 0 ${chartConfig.width} ${chartConfig.height}`} 
-          className="w-full h-full"
+          className="w-full h-full touch-none"
           preserveAspectRatio="xMidYMid meet"
         >
           {/* Quadrant Backgrounds */}
           {activeQuadrant && (
             <>
-              {/* Scale + Depth (top-right) */}
               <rect 
                 x="50" y="0" width="50" height="50" 
                 fill={activeQuadrant === 'scale-depth' ? '#10b981' : 'transparent'} 
                 fillOpacity={activeQuadrant === 'scale-depth' ? 0.1 : 0}
                 className="transition-all duration-300"
               />
-              {/* Niche Deep (top-left) */}
               <rect 
                 x="0" y="0" width="50" height="50" 
                 fill={activeQuadrant === 'niche-deep' ? '#10b981' : 'transparent'} 
                 fillOpacity={activeQuadrant === 'niche-deep' ? 0.1 : 0}
                 className="transition-all duration-300"
               />
-              {/* Low Impact (bottom-left) */}
               <rect 
                 x="0" y="50" width="50" height="50" 
                 fill={activeQuadrant === 'low-impact' ? '#10b981' : 'transparent'} 
                 fillOpacity={activeQuadrant === 'low-impact' ? 0.1 : 0}
                 className="transition-all duration-300"
               />
-              {/* Broad Shallow (bottom-right) */}
               <rect 
                 x="50" y="50" width="50" height="50" 
                 fill={activeQuadrant === 'broad-shallow' ? '#10b981' : 'transparent'} 
@@ -137,7 +133,7 @@ export const MatrixChart: React.FC<Props> = ({ data, activeId, onSelect, isDark,
                     <circle
                       cx={point.cx}
                       cy={point.cy}
-                      r={point.r + 2}
+                      r={point.r + 2.5}
                       fill="none"
                       stroke={colors.dotFocused}
                       strokeWidth="0.15"
@@ -146,7 +142,7 @@ export const MatrixChart: React.FC<Props> = ({ data, activeId, onSelect, isDark,
                     <circle
                       cx={point.cx}
                       cy={point.cy}
-                      r={point.r + 1}
+                      r={point.r + 1.5}
                       fill="none"
                       stroke={colors.dotFocused}
                       strokeWidth="0.2"
@@ -154,7 +150,7 @@ export const MatrixChart: React.FC<Props> = ({ data, activeId, onSelect, isDark,
                     />
                   </>
                 )}
-                {/* Main dot */}
+                {/* Main dot - larger touch target on mobile */}
                 <circle
                   cx={point.cx}
                   cy={point.cy}
@@ -167,14 +163,23 @@ export const MatrixChart: React.FC<Props> = ({ data, activeId, onSelect, isDark,
                   }}
                   onClick={() => onSelect(point.id)}
                 />
+                {/* Invisible larger touch target for mobile */}
+                <circle
+                  cx={point.cx}
+                  cy={point.cy}
+                  r={Math.max(point.r + 2, 4)}
+                  fill="transparent"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => onSelect(point.id)}
+                />
                 {/* Label for active point */}
                 {isActive && (
                   <text
                     x={point.cx}
-                    y={point.cy - point.r - 1.5}
+                    y={point.cy - point.r - 2}
                     textAnchor="middle"
                     fill={colors.dotFocused}
-                    fontSize="1.8"
+                    fontSize="2"
                     fontFamily="JetBrains Mono, monospace"
                     fontWeight="500"
                   >
@@ -187,17 +192,17 @@ export const MatrixChart: React.FC<Props> = ({ data, activeId, onSelect, isDark,
         </svg>
       </div>
 
-      {/* Quadrant Labels */}
-      <div className={`absolute top-14 left-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('niche-deep')}`}>
+      {/* Quadrant Labels - Responsive positioning */}
+      <div className={`absolute top-8 sm:top-14 left-8 sm:left-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('niche-deep')}`}>
         Niche Deep
       </div>
-      <div className={`absolute top-14 right-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('scale-depth')}`}>
+      <div className={`absolute top-8 sm:top-14 right-8 sm:right-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('scale-depth')}`}>
         Scale + Depth
       </div>
-      <div className={`absolute bottom-14 left-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('low-impact')}`}>
+      <div className={`absolute bottom-8 sm:bottom-14 left-8 sm:left-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('low-impact')}`}>
         Low Impact
       </div>
-      <div className={`absolute bottom-14 right-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('broad-shallow')}`}>
+      <div className={`absolute bottom-8 sm:bottom-14 right-8 sm:right-14 mono uppercase tracking-wider transition-all duration-300 ${quadrantLabelClass('broad-shallow')}`}>
         Broad Shallow
       </div>
 
